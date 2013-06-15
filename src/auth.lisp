@@ -57,6 +57,14 @@
       (:content-type "text/plain")
       (,result))))
 
+(defmethod main-call ((this <ariadne-auth>) env)
+  "Main call handler for user authorization."
+
+)
+
+
+
+
 (defgeneric extract-hash (this env key)
   (:documentation "Extracts a hash from the environment table."))
 (defmethod  extract-hash ((this ariadne-auth>) env key)
