@@ -3,25 +3,8 @@
 ;;;; By Tylor Kobierski
 (in-package :ariadne)
 
-(defclass <ariadne-pages> (<middleware>)
-
-)
-
-(defmethod call ((this <ariadne-pages>) env)
-  ;; Split the page-info
-  (let* ((page-info (getf env :page-info))
-	 (page-split (split-sequence #\/ page-info)))
-
-    ;; Determine whether this is an API call
-    ;; Or an indirect call
-    (cond ((string= (first page-split) "api")
-	   (api-call this env))
-	  ((string= (first page-split) "page")
-	   (main-call this env)))
-
-    (let ((response (call-next env)))
-      ;; No postprocessing necessary
-      )))
+(defclass <ariadne-pages> (<ariadne-module>)
+  (:documentation "Manages static content pages."))
 
 (defgeneric authorize (this env)
   (:documentation "Checks if the operation is permitted based on user group."))
@@ -36,16 +19,6 @@
     (when (> user-level page-level)
       user-level)))
 
-(defmethod  api-call ((this <ariadne-pages>) env)
-  "API calls for the page manager."
-  ;; Let main call fill the environment appropriately
-  ;; And display the result as text.
-  (main-call this)
-  `(200
-    (:content-type "text/plain")
-    (,(getf env :ariadne.pages))))
-
-
 (defmethod  main-call ((this <ariadne-pages>) env)
   "Standard calls for the page manager."
   (let ((page-split (splitted-info env)))
@@ -53,23 +26,38 @@
       (cond ((eql (second page-split) "new")
 	     (new-page this env))
 
-	    ((eql (second page-split) "admin")
-	     (administration this env))
-
-	    (t ;; Assume it's a page-id
-	     (setf (getf env :ariadne.pages) (get-page ))
-	     )))
+	    (t ;; Assume it's a page-id and retrieve it.
+	     (setf (getf env :ariadne.pages) (get-page this second page-split)))))
 
 
     (when (> (length page-split) 2)
       (cond ((eql (third page-split) "edit")
-	     
-	     )
+	     ;; Retrieve page-id if it is an argument
+	     (if (eql (length page-split) 4)
+		 (progn 
+		   ;; Retrieve page-id if exists
+		   (let ((post-info (get-post-info env)))
+
+		     (setf (getf env :ariadne.pages) "Page-id successfully changed.")))
+		 (setf (getf env :ariadne.pages) "No page-id specified.")))
 	    ((eql (third page-split) "delete")
-	     
-	     )
+	     (if (eql (length page-split) 4)
+		 (progn
+		   ;; Retrieve page-id
+
+		   )
+		 (setf (getf env :ariadne.pages) "No page-id specified.")))
 
 	    (t
 
 	     ))
 )
+
+(defmethod admin-call ((this <ariadne-pages>) env)
+  "Ariadne pages administration"
+)
+
+(defgeneric get-page (this page-id)
+  (:documentation "Retrieves page content"))
+(defmethod  get-page ((this <ariadne-pages>) page-id)
+  (query (:select :from 'pages :where (:= 'page-id page-id))))
