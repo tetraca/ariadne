@@ -20,6 +20,11 @@
   (:documentation "The Ariadne Configuration File Manager"))
 
 (defmethod call ((this <ariadne-config>) env)
+  ;; Load configuration and place it onto the environment
+  ;; The config module uniquely should not interact through API calls.
+  ;; Consideration: Config should be loaded once in a global parameter
+  ;;                Currently not important
+
   (load-config this)
   (setf (getf env :ariadne.config) (config-data this))
   (let ((response (call-next this env)))
@@ -41,13 +46,15 @@
       (with-standard-io-syntax
 	(setq read-data (read config-stream))))
 
+    ;; Sort keywords and their values into separate lists
     (mapcar #'(lambda (x)
 		(if (keywordp x)
 		    (push x keylist)
 		    (push x vallist))
 		x)
 	    read-data)
-
+    
+    ;; Associate all the list items into a hash table
     (do ((i           0               (incf i))
 	 (current-key (elt keylist 0) (elt keylist i))
 	 (current-val (elt vallist 0) (elt vallist i)))
