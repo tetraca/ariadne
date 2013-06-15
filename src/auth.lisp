@@ -19,10 +19,11 @@
 
 (in-package :ariadne)
 
-(defclass <ariadne-auth> (<middleware>) 
+(defclass <ariadne-auth> (<ariadne-module>) 
   ((:documentation "The Ariadne Authorization Middleware for Clack.")))
 
-(defmethod call ((this <ariadne-auth>) env)
+(defmethod main-call ((this <ariadne-auth>) env)
+  "Main call handler for user authorization."
   ;; Write a logflag cookie for a guest.
   (unless (extract-hash this env "logflag")
     (setf (gethash :logflag (getf env :clack.session)) 0))
@@ -36,30 +37,22 @@
 	    (find-associated-user this env))
       (setf (gethash :auth.user (getf env :clack.session))
 	    nil))
-  (let ((result nil))
 
-    ;; Authorization API Requests
-    (cond ((string= (getf env :path-info)
-		    "/api/auth/login")
+  (let ((split-info (splitted-info env))
+	(result     "Request not processed."))
+    (cond ((string= (second split-info) "login")
 	   (setf result (login-user this env)))
-	  ((string= (getf env :path-info)
-		    "/api/auth/logout")
+	  ((string= (second split-info) "logout")
 	   (setf result (logout-user this env)))
-	  ((string= (getf env :path-info)
-		    "/api/auth/register")
+	  ((string= (second split-info) "register")
 	   (setf result (register-user this env)))
-	  ((string= (getf env :path-info)
-		    "/api/auth/verify")
-	   (setf result (verify-user this env))))
+	  (t
+	   (setf result "Invalid request.")))
+    (setf (getf env :ariadne.auth) result)))
 
-    ;; Return API request result
-    `(200
-      (:content-type "text/plain")
-      (,result))))
-
-(defmethod main-call ((this <ariadne-auth>) env)
-  "Main call handler for user authorization."
-
+(defmethod admin-call ((this <ariadne-auth>) env)
+  "Administration functions"
+  ;; Work in progress
 )
 
 
@@ -134,6 +127,7 @@
       "You are not logged in. There's no need for you to log off!"
       (progn
 	;; Only remove a valid session-id.
+	
 
 	;; Remove associated session-id from database.
 	(execute (:update 'users
