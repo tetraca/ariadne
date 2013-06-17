@@ -16,4 +16,13 @@ All packages required to run ariadne are available using [Quicklisp](http://www.
  * cl-smtp
  * Common Lisp Files and Directories (cl-fad)
  * Common Lisp Portable Perl-compatable Common Regular Expresions (cl-ppcre)
+ * Ironclad
 
+Installation
+------------
+ # Flip to your working directory
+ # Load the postmodern and cl-fad libraries
+ # Load install.lisp in your lisp installation.
+ # Run the installer via (run-installer). Run installer takes several key arguments. Look at install.lisp for details.
+
+You can then run the server via loading server.lisp.
