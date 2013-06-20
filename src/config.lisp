@@ -23,7 +23,8 @@
   ;; Load configuration and place it onto the environment
   ;; The config module uniquely should not interact through API calls.
   ;; Consideration: Config should be loaded once in a global parameter
-  ;;                Currently not important
+  ;;                If we do this, then it would be necessary to update
+  ;;                it manually each time it changed.
 
   (load-config this)
   (setf (getf env :ariadne.config) (config-data this))
