@@ -12,3 +12,7 @@
   "Returns the submitted POST plist, if it exists."
   (clack.request:body-parameter (clack.request:make-request env)))
 
+(defmacro with-request-method (method &rest body)
+  "Convenience macro for separating POST and GET operations."
+  `(when (eql (getf env :request-method) ,method)
+    ,@body))
