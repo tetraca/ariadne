@@ -19,7 +19,7 @@
 (defmethod call ((this <ariadne-module>) env)
   "Generic ariadne module call method"
   (let ((path-info (splitted-info env)))
-    ;; Respond to requests for this specific module.
+    ;; Respond to requests for this specific module only.
 
     ;; Module API Request
     (when (and (string= (first path-info) "api")
@@ -52,10 +52,11 @@
   ;; to be overwritten.
   (main-call this env)
 
-  ;; The results should be placed in the identifier.
+  ;; The results should have been temporarily placed in :ariadne.display
+  ;; Read from there
   `(200
     (:content-type "text/plain")
-    (,(getf env (identifier this)))))
+    (,(getf env :ariadne.display))))
 
 
 (defgeneric main-call (this env)
