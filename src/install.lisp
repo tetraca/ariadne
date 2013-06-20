@@ -10,6 +10,7 @@
 
 (defun run-installer (&key (site-name "Ariadne Default Website")
 			   (site-email "admin@localhost")
+			    site-address ""
 			   (site-port 5000)
 			   database-name 
 			   database-user
@@ -60,7 +61,8 @@
 					 :unique  t
 					 :primary-key t) 
 			     (password   :type    (string 32)) 
-			     (email      :type    (varchar 255))
+			     (email      :type    (varchar 255)
+					 :unique  t)
 			     (session-id :type    (string 32))
 			     (verified   :type    boolean
 					 :default "false")
